@@ -236,10 +236,11 @@ function! OmniSharp#GotoDefinition(...) abort
   endif
 endfunction
 
-function! s:CBGotoDefinition(opts, location) abort
+function! s:CBGotoDefinition(location, metadata) abort
   if type(a:location) != type({}) " Check whether a dict was returned
     echo 'Not found'
-    let found = 0
+    let found = OmniSharp#GotoMetadata(a:metadata)
+    " return 0
   else
     let found = OmniSharp#JumpToLocation(a:location, 0)
   endif
@@ -247,6 +248,25 @@ function! s:CBGotoDefinition(opts, location) abort
     call a:opts.Callback(found)
   endif
   return found
+endfunction
+
+function! OmniSharp#GotoMetadata(metadata) abort
+  if g:OmniSharp_server_stdio
+    call OmniSharp#stdio#GotoMetadata(function('s:CBGotoMetadata'), a:metadata)
+  else
+    " TODO: Implement python method
+    let response = OmniSharp#py#eval('getMetadata()')
+    if OmniSharp#CheckPyError() | return 0 | endif
+    return s:CBGotoMetadata(response)
+  endif
+endfunction
+
+function! s:CBGotoMetadata(response) abort
+  " call s:WriteToPreview(a:response.Source)
+  let l:fl = tempname()
+  echom fl
+  call writefile(split(a:response.Source, "\n", 1), l:fl, 'b')
+  execute "e ".fl
 endfunction
 
 function! OmniSharp#PreviewDefinition() abort

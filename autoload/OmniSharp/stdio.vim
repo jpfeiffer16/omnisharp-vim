@@ -493,19 +493,43 @@ function! s:GetCompletionsRH(Callback, response) abort
 endfunction
 
 function! OmniSharp#stdio#GotoDefinition(Callback) abort
+  let parameters = {
+  \ 'WantMetadata': v:true,
+  \}
   let opts = {
-  \ 'ResponseHandler': function('s:GotoDefinitionRH', [a:Callback])
+  \ 'ResponseHandler': function('s:GotoDefinitionRH', [a:Callback]),
+  \ 'Parameters': parameters
   \}
   call s:Request('/gotodefinition', opts)
 endfunction
 
 function! s:GotoDefinitionRH(Callback, response) abort
+  echom a:response
   if !a:response.Success | return | endif
   if get(a:response.Body, 'FileName', v:null) != v:null
-    call a:Callback(s:LocationsFromResponse([a:response.Body])[0])
+    call a:Callback(s:LocationsFromResponse([a:response.Body])[0], a:response.Body.MetadataSource)
   else
-    call a:Callback(0)
+    call a:Callback(0, a:response.Body.MetadataSource)
   endif
+endfunction
+
+function! OmniSharp#stdio#GotoMetadata(Callback, metadata) abort
+  let opts = {
+  \ 'ResponseHandler': function('s:GotoMetadataRH', [a:Callback]),
+  \ 'Parameters': a:metadata
+  \}
+  call s:Request('/metadata', opts)
+endfunction
+
+function! s:GotoMetadataRH(Callback, response) abort
+  " echom a:response
+  if !a:response.Success | return | endif
+  call a:Callback(a:response.Body)
+  " if get(a:response.Body, 'FileName', v:null) != v:null
+  "   call a:Callback(s:LocationsFromResponse([a:response.Body])[0])
+  " else
+  "   call a:Callback(0)
+  " endif
 endfunction
 
 function! OmniSharp#stdio#NavigateDown() abort
