@@ -280,9 +280,10 @@ function! s:CBGotoMetadata(response, metadata) abort
   " call cursor(a:response.Line, a:response.Column)
 
   " execute 'silent pedit '.a:response.SourceName
+  execute 'silent pedit test.cs'
   " silent wincmd P
-  " execute 'silent e '.a:response.SourceName
-  " silent put =a:response.Source
+  execute 'silent e test.cs'
+  silent put =a:response.Source
 endfunction
 
 function! OmniSharp#PreviewDefinition() abort
