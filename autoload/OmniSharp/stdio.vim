@@ -507,24 +507,24 @@ function! s:GotoDefinitionRH(Callback, response) abort
   echom a:response
   if !a:response.Success | return | endif
   if get(a:response.Body, 'FileName', v:null) != v:null
-    call a:Callback(s:LocationsFromResponse([a:response.Body])[0], a:response.Body.MetadataSource)
+    call a:Callback(s:LocationsFromResponse([a:response.Body])[0], a:response.Body)
   else
-    call a:Callback(0, a:response.Body.MetadataSource)
+    call a:Callback(0, a:response.Body)
   endif
 endfunction
 
 function! OmniSharp#stdio#GotoMetadata(Callback, metadata) abort
   let opts = {
-  \ 'ResponseHandler': function('s:GotoMetadataRH', [a:Callback]),
-  \ 'Parameters': a:metadata
+  \ 'ResponseHandler': function('s:GotoMetadataRH', [a:Callback, a:metadata]),
+  \ 'Parameters': a:metadata.MetadataSource
   \}
   call s:Request('/metadata', opts)
 endfunction
 
-function! s:GotoMetadataRH(Callback, response) abort
+function! s:GotoMetadataRH(Callback, metadata, response) abort
   " echom a:response
   if !a:response.Success | return | endif
-  call a:Callback(a:response.Body)
+  call a:Callback(a:response.Body, a:metadata)
   " if get(a:response.Body, 'FileName', v:null) != v:null
   "   call a:Callback(s:LocationsFromResponse([a:response.Body])[0])
   " else

@@ -253,7 +253,7 @@ endfunction
 function! OmniSharp#GotoMetadata(metadata) abort
   echom a:metadata
   if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#GotoMetadata(function('s:CBGotoMetadata'), a:metadata)
+    return OmniSharp#stdio#GotoMetadata(function('s:CBGotoMetadata'), a:metadata)
   else
     " TODO: Implement python method
     let response = OmniSharp#py#eval('getMetadata()')
@@ -262,14 +262,27 @@ function! OmniSharp#GotoMetadata(metadata) abort
   endif
 endfunction
 
-function! s:CBGotoMetadata(response) abort
+function! s:CBGotoMetadata(response, metadata) abort
+  " What we need to do here:
+  " 1. Fill a readonly buffer with the Source from the metadata response
+  " 2. Set a buffer variable to mark that this is a metadata file
+  "   and the filename that should be sent with susbsequent `gotodefinition` requests
+  "   should be this variable
+  " 3. Set the filetype and whatever else we need to do to get the omnisharp-roslyn
+  "   autocmds to work
   echom a:response
+  echom a:metadata
   " call s:WriteToPreview(a:response.Source)
-  let l:fl = tempname().'.cs'
-  echom fl
-  call writefile(split(a:response.Source, "\n", 1), l:fl, 'b')
-  execute "e ".fl
+  " let l:fl = tempname().'.cs'
+  " echom fl
+  " call writefile(split(a:response.Source, "\n", 1), l:fl, 'b')
+  " execute "e ".fl
   " call cursor(a:response.Line, a:response.Column)
+
+  " execute 'silent pedit '.a:response.SourceName
+  " silent wincmd P
+  " execute 'silent e '.a:response.SourceName
+  " silent put =a:response.Source
 endfunction
 
 function! OmniSharp#PreviewDefinition() abort
