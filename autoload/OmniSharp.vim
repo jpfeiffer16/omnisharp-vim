@@ -251,6 +251,7 @@ function! s:CBGotoDefinition(location, metadata) abort
 endfunction
 
 function! OmniSharp#GotoMetadata(metadata) abort
+  echom a:metadata
   if g:OmniSharp_server_stdio
     call OmniSharp#stdio#GotoMetadata(function('s:CBGotoMetadata'), a:metadata)
   else
@@ -262,11 +263,13 @@ function! OmniSharp#GotoMetadata(metadata) abort
 endfunction
 
 function! s:CBGotoMetadata(response) abort
+  echom a:response
   " call s:WriteToPreview(a:response.Source)
-  let l:fl = tempname()
+  let l:fl = tempname().'.cs'
   echom fl
   call writefile(split(a:response.Source, "\n", 1), l:fl, 'b')
   execute "e ".fl
+  " call cursor(a:response.Line, a:response.Column)
 endfunction
 
 function! OmniSharp#PreviewDefinition() abort
