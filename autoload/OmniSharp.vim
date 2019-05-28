@@ -238,9 +238,14 @@ endfunction
 
 function! s:CBGotoDefinition(location, metadata) abort
   if type(a:location) != type({}) " Check whether a dict was returned
-    echo 'Not found'
-    let found = OmniSharp#GotoMetadata(a:metadata)
-    " return 0
+    echom g:OmniSharp_lookup_metadata
+    echom type(g:OmniSharp_lookup_metadata)
+    if type(g:OmniSharp_lookup_metadata) != type('')
+      echo 'Not found'
+      let found = 0
+    else
+      let found = OmniSharp#GotoMetadata(a:metadata)
+    endif
   else
     let found = OmniSharp#JumpToLocation(a:location, 0)
   endif
@@ -270,20 +275,40 @@ function! s:CBGotoMetadata(response, metadata) abort
   "   should be this variable
   " 3. Set the filetype and whatever else we need to do to get the omnisharp-roslyn
   "   autocmds to work
-  echom a:response
-  echom a:metadata
-  " call s:WriteToPreview(a:response.Source)
-  " let l:fl = tempname().'.cs'
-  " echom fl
-  " call writefile(split(a:response.Source, "\n", 1), l:fl, 'b')
-  " execute "e ".fl
-  " call cursor(a:response.Line, a:response.Column)
+  " echom a:response
+  " echom a:metadata
+  if g:OmniSharp_lookup_metadata == 'preview'
+    call s:WriteToPreview(a:response.Source)
+    silent wincmd p
+    call cursor(a:metadata.Line, a:metadata.Column)
+  elseif g:OmniSharp_lookup_metadata == 'window'
+    " echom "Window"
+    " let l:fl = tempname().'.cs'
+    " echom fl
+    " call writefile(split(a:response.Source, "\n", 1), l:fl, 'b')
+    " execute "e ".fl
+    " e __OmniSharpScratch__
+    " execute 'silent pedit '.a:response.SourceName
+    let metadata_filename = fnamemodify(a:response.SourceName, ":t")
+    execute 'silent pedit '.metadata_filename
+    execute 'silent e '.metadata_filename
+    setlocal modifiable noreadonly
+    " setlocal nobuflisted buftype=nofile bufhidden=wipe
+    setlocal buftype=nofile
+    0,$d
+    silent put =a:response.Source
+    0d_
+    setlocal nomodifiable readonly
+    call cursor(a:metadata.Line, a:metadata.Column)
+    normal! mO
+    for _ in [1,2,3]
+      execute "normal! \<C-o>"
+    endfor
+    normal! `O
+  else
+    return 0
+  endif
 
-  " execute 'silent pedit '.a:response.SourceName
-  execute 'silent pedit test.cs'
-  " silent wincmd P
-  execute 'silent e test.cs'
-  silent put =a:response.Source
 endfunction
 
 function! OmniSharp#PreviewDefinition() abort
