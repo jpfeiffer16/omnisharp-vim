@@ -230,13 +230,14 @@ function! OmniSharp#GotoDefinition(...) abort
     let Callback = function('s:CBGotoDefinition', [opts])
     call OmniSharp#stdio#GotoDefinition(Callback)
   else
+    " TODO: Get python working for metadata
     let loc = OmniSharp#py#eval('gotoDefinition()')
     if OmniSharp#CheckPyError() | return 0 | endif
     return s:CBGotoDefinition(opts, loc)
   endif
 endfunction
 
-function! s:CBGotoDefinition(location, metadata) abort
+function! s:CBGotoDefinition(opts, location, metadata) abort
   if type(a:location) != type({}) " Check whether a dict was returned
     if type(g:OmniSharp_lookup_metadata) != type('')
       echo 'Not found'
@@ -288,22 +289,25 @@ function! s:CBGotoMetadata(response, metadata) abort
     " e __OmniSharpScratch__
     " execute 'silent pedit '.a:response.SourceName
     let metadata_filename = fnamemodify(a:response.SourceName, ":t")
-    " execute 'silent pedit '.metadata_filename
-    execute 'e '.metadata_filename
-    " setlocal modifiable noreadonly
+    execute 'silent pedit '.metadata_filename
+    execute 'silent edit '.metadata_filename
+    " setlocal buftype
+    setlocal modifiable noreadonly
     0,$d
     silent put =a:response.Source
     0d_
-    setlocal buftype=nofile
-    " setlocal nobuflisted buftype=nofile bufhidden=wipe
+    setlocal nobuflisted buftype=nofile bufhidden=wipe
     setlocal nomodifiable readonly
+    " setlocal nobuflisted buftype=nofile buftype=nofile
     call cursor(a:metadata.Line, a:metadata.Column)
     normal! mO
     for _ in [1,2,3]
       execute "normal! \<C-o>"
     endfor
     normal! `O
-    normal! delmarks O
+    " execute 'normal! delmarks O'
+    execute 'pclose'
+    return 1
   else
     return 0
   endif
