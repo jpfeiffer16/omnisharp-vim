@@ -238,8 +238,6 @@ endfunction
 
 function! s:CBGotoDefinition(location, metadata) abort
   if type(a:location) != type({}) " Check whether a dict was returned
-    echom g:OmniSharp_lookup_metadata
-    echom type(g:OmniSharp_lookup_metadata)
     if type(g:OmniSharp_lookup_metadata) != type('')
       echo 'Not found'
       let found = 0
@@ -290,14 +288,14 @@ function! s:CBGotoMetadata(response, metadata) abort
     " e __OmniSharpScratch__
     " execute 'silent pedit '.a:response.SourceName
     let metadata_filename = fnamemodify(a:response.SourceName, ":t")
-    execute 'silent pedit '.metadata_filename
-    execute 'silent e '.metadata_filename
-    setlocal modifiable noreadonly
-    " setlocal nobuflisted buftype=nofile bufhidden=wipe
-    setlocal buftype=nofile
+    " execute 'silent pedit '.metadata_filename
+    execute 'e '.metadata_filename
+    " setlocal modifiable noreadonly
     0,$d
     silent put =a:response.Source
     0d_
+    setlocal buftype=nofile
+    " setlocal nobuflisted buftype=nofile bufhidden=wipe
     setlocal nomodifiable readonly
     call cursor(a:metadata.Line, a:metadata.Column)
     normal! mO
@@ -305,6 +303,7 @@ function! s:CBGotoMetadata(response, metadata) abort
       execute "normal! \<C-o>"
     endfor
     normal! `O
+    normal! delmarks O
   else
     return 0
   endif
