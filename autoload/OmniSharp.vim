@@ -14,6 +14,7 @@ let s:generated_snippets = {}
 let s:last_completion_dictionary = {}
 let s:alive_cache = []
 let s:initial_server_ports = copy(g:OmniSharp_server_ports)
+let s:temppath = fnamemodify(tempname(), ':p:h')
 
 function! OmniSharp#GetPort(...) abort
   if exists('g:OmniSharp_port')
@@ -282,31 +283,38 @@ function! s:CBGotoMetadata(response, metadata) abort
     call cursor(a:metadata.Line, a:metadata.Column)
   elseif g:OmniSharp_lookup_metadata == 'window'
     " echom "Window"
-    " let l:fl = tempname().'.cs'
     " echom fl
-    " call writefile(split(a:response.Source, "\n", 1), l:fl, 'b')
     " execute "e ".fl
     " e __OmniSharpScratch__
     " execute 'silent pedit '.a:response.SourceName
+    let host = b:OmniSharp_host
     let metadata_filename = fnamemodify(a:response.SourceName, ":t")
-    execute 'silent pedit '.metadata_filename
-    execute 'silent edit '.metadata_filename
+    let temp_file = s:temppath.'/'.metadata_filename
+    echo temp_file
+    call writefile(split(a:response.Source, "\n", 1), temp_file, 'b')
+    echom temp_file
+    " execute 'silent pedit '.metadata_filename
+    execute 'silent edit '.temp_file
     " setlocal buftype
-    setlocal modifiable noreadonly
-    0,$d
-    silent put =a:response.Source
-    0d_
-    setlocal nobuflisted buftype=nofile bufhidden=wipe
-    setlocal nomodifiable readonly
+    "
+    " setlocal modifiable noreadonly
+    " 0,$d
+    " silent put =a:response.Source
+    " 0d_
+    " setlocal nobuflisted buftype=nofile bufhidden=wipe
+    " setlocal nomodifiable readonly
     " setlocal nobuflisted buftype=nofile buftype=nofile
+    "
     call cursor(a:metadata.Line, a:metadata.Column)
-    normal! mO
-    for _ in [1,2,3]
-      execute "normal! \<C-o>"
-    endfor
-    normal! `O
+    " normal! mO
+    " for _ in [1,2,3]
+    "   execute "normal! \<C-o>"
+    " endfor
+    " normal! `O
     " execute 'normal! delmarks O'
-    execute 'pclose'
+    " execute 'pclose'
+    let b:metadata_filename = a:response.SourceName
+    let b:OmniSharp_host = host
     return 1
   else
     return 0
@@ -904,7 +912,8 @@ endfunction
 
 function! OmniSharp#StartServerIfNotRunning(...) abort
   if OmniSharp#FugitiveCheck() | return | endif
-
+  echom get(b:, "metadata_filename", v:null)
+  if type(get(b:, "metadata_filename", v:null)) == type('') | return | endif
   let sln_or_dir = a:0 ? a:1 : ''
   call OmniSharp#StartServer(sln_or_dir, 1)
 endfunction

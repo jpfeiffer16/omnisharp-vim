@@ -95,8 +95,14 @@ function! s:Request(command, opts) abort
   if has_key(a:opts, 'SavePosition')
     let s:lastPosition = [bufnum, lnum, cnum]
   endif
-  let filename = OmniSharp#util#TranslatePathForServer(
-  \ fnamemodify(bufname(bufnum), ':p'))
+  let metadata_filename = get(b:, 'metadata_filename', v:null)
+  let is_metadata = type(metadata_filename) == type('')
+  if is_metadata
+    let filename = metadata_filename
+  else
+    let filename = OmniSharp#util#TranslatePathForServer(
+    \ fnamemodify(bufname(bufnum), ':p'))
+  endif
   let lines = getbufline(bufnum, 1, '$')
   let tmp = join(lines, '')
   " Unique string separator which must not exist in the buffer
@@ -111,9 +117,12 @@ function! s:Request(command, opts) abort
   \   'Filename': filename,
   \   'Line': lnum,
   \   'Column': cnum,
-  \   'Buffer': buffer
   \ }
   \}
+
+  if is_metadata != type('')
+    let body.Arguments.Buffer = buffer
+  endif
   return s:RawRequest(body, a:command, a:opts, sep)
 endfunction
 
@@ -518,13 +527,13 @@ function! OmniSharp#stdio#GotoMetadata(Callback, metadata) abort
   \ 'ResponseHandler': function('s:GotoMetadataRH', [a:Callback, a:metadata]),
   \ 'Parameters': a:metadata.MetadataSource
   \}
-  call s:Request('/metadata', opts)
+  return s:Request('/metadata', opts)
 endfunction
 
 function! s:GotoMetadataRH(Callback, metadata, response) abort
   " echom a:response
-  if !a:response.Success | return | endif
-  call a:Callback(a:response.Body, a:metadata)
+  if !a:response.Success | return 0 | endif
+  return a:Callback(a:response.Body, a:metadata)
   " if get(a:response.Body, 'FileName', v:null) != v:null
   "   call a:Callback(s:LocationsFromResponse([a:response.Body])[0])
   " else
