@@ -140,6 +140,11 @@ function! s:RawRequest(body, command, opts, ...) abort
   let a:body['Seq'] = s:nextseq
   let a:body['Type'] = 'Request'
   if has_key(a:opts, 'Parameters')
+    " echom a:command
+    " echom "Arguments:"
+    " echom a:body.Arguments
+    " echom "Opts:"
+    " echom a:opts
     call extend(a:body.Arguments, a:opts.Parameters, 'force')
   endif
   if sep !=# ''
@@ -513,7 +518,6 @@ function! OmniSharp#stdio#GotoDefinition(Callback) abort
 endfunction
 
 function! s:GotoDefinitionRH(Callback, response) abort
-  echom a:response
   if !a:response.Success | return | endif
   if get(a:response.Body, 'FileName', v:null) != v:null
     call a:Callback(s:LocationsFromResponse([a:response.Body])[0], a:response.Body)

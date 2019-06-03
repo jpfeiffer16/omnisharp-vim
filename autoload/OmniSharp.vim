@@ -256,7 +256,6 @@ function! s:CBGotoDefinition(opts, location, metadata) abort
 endfunction
 
 function! OmniSharp#GotoMetadata(metadata) abort
-  echom a:metadata
   if g:OmniSharp_server_stdio
     return OmniSharp#stdio#GotoMetadata(function('s:CBGotoMetadata'), a:metadata)
   else
@@ -268,57 +267,28 @@ function! OmniSharp#GotoMetadata(metadata) abort
 endfunction
 
 function! s:CBGotoMetadata(response, metadata) abort
-  " What we need to do here:
-  " 1. Fill a readonly buffer with the Source from the metadata response
-  " 2. Set a buffer variable to mark that this is a metadata file
-  "   and the filename that should be sent with susbsequent `gotodefinition` requests
-  "   should be this variable
-  " 3. Set the filetype and whatever else we need to do to get the omnisharp-roslyn
-  "   autocmds to work
-  " echom a:response
-  " echom a:metadata
+  let host = b:OmniSharp_host
+  let metadata_filename = fnamemodify(a:response.SourceName, ":t")
+  let temp_file = s:temppath.'/'.metadata_filename
+  call writefile(
+  \ map(split(a:response.Source, "\n", 1), {i,v -> substitute(v, '\r', '', 'g')}),
+  \ temp_file,
+  \ 'b'
+  \)
   if g:OmniSharp_lookup_metadata == 'preview'
-    call s:WriteToPreview(a:response.Source)
+    execute 'silent pedit '.temp_file
     silent wincmd p
-    call cursor(a:metadata.Line, a:metadata.Column)
   elseif g:OmniSharp_lookup_metadata == 'window'
-    " echom "Window"
-    " echom fl
-    " execute "e ".fl
-    " e __OmniSharpScratch__
-    " execute 'silent pedit '.a:response.SourceName
-    let host = b:OmniSharp_host
-    let metadata_filename = fnamemodify(a:response.SourceName, ":t")
-    let temp_file = s:temppath.'/'.metadata_filename
-    echo temp_file
-    call writefile(split(a:response.Source, "\n", 1), temp_file, 'b')
-    echom temp_file
-    " execute 'silent pedit '.metadata_filename
     execute 'silent edit '.temp_file
-    " setlocal buftype
-    "
-    " setlocal modifiable noreadonly
-    " 0,$d
-    " silent put =a:response.Source
-    " 0d_
-    " setlocal nobuflisted buftype=nofile bufhidden=wipe
-    " setlocal nomodifiable readonly
-    " setlocal nobuflisted buftype=nofile buftype=nofile
-    "
-    call cursor(a:metadata.Line, a:metadata.Column)
-    " normal! mO
-    " for _ in [1,2,3]
-    "   execute "normal! \<C-o>"
-    " endfor
-    " normal! `O
-    " execute 'normal! delmarks O'
-    " execute 'pclose'
-    let b:metadata_filename = a:response.SourceName
-    let b:OmniSharp_host = host
-    return 1
   else
     return 0
   endif
+  let b:metadata_filename = a:response.SourceName
+  call cursor(a:metadata.Line, a:metadata.Column)
+  let b:OmniSharp_host = host
+  " setlocal nobuflisted bufhidden=wipe
+  setlocal nomodifiable readonly
+  return 1
 
 endfunction
 
@@ -912,8 +882,7 @@ endfunction
 
 function! OmniSharp#StartServerIfNotRunning(...) abort
   if OmniSharp#FugitiveCheck() | return | endif
-  echom get(b:, "metadata_filename", v:null)
-  if type(get(b:, "metadata_filename", v:null)) == type('') | return | endif
+  " if type(get(b:, "metadata_filename", v:null)) == type('') | return | endif
   let sln_or_dir = a:0 ? a:1 : ''
   call OmniSharp#StartServer(sln_or_dir, 1)
 endfunction
