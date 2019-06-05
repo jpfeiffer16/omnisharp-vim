@@ -267,7 +267,7 @@ function! OmniSharp#GotoMetadata(metadata) abort
 endfunction
 
 function! s:CBGotoMetadata(response, metadata) abort
-  let host = b:OmniSharp_host
+  let host = OmniSharp#GetHost()
   let metadata_filename = fnamemodify(a:response.SourceName, ":t")
   let temp_file = s:temppath.'/'.metadata_filename
   call writefile(
@@ -283,9 +283,9 @@ function! s:CBGotoMetadata(response, metadata) abort
   else
     return 0
   endif
+  let b:OmniSharp_host = host
   let b:metadata_filename = a:response.SourceName
   call cursor(a:metadata.Line, a:metadata.Column)
-  let b:OmniSharp_host = host
   " setlocal nobuflisted bufhidden=wipe
   setlocal nomodifiable readonly
   return 1
@@ -882,7 +882,7 @@ endfunction
 
 function! OmniSharp#StartServerIfNotRunning(...) abort
   if OmniSharp#FugitiveCheck() | return | endif
-  " if type(get(b:, "metadata_filename", v:null)) == type('') | return | endif
+  if type(get(b:, "metadata_filename", v:null)) == type('') | return | endif
   let sln_or_dir = a:0 ? a:1 : ''
   call OmniSharp#StartServer(sln_or_dir, 1)
 endfunction
