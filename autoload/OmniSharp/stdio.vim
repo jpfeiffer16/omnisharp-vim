@@ -95,7 +95,7 @@ function! s:Request(command, opts) abort
   if has_key(a:opts, 'SavePosition')
     let s:lastPosition = [bufnum, lnum, cnum]
   endif
-  let metadata_filename = get(b:, 'metadata_filename', v:null)
+  let metadata_filename = get(b:, 'OmniSharp_metadata_filename', v:null)
   let is_metadata = type(metadata_filename) == type('')
   if is_metadata
     let filename = metadata_filename

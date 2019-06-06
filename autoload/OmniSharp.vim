@@ -292,7 +292,7 @@ function! s:CBGotoMetadata(response, metadata) abort
   let b:OmniSharp_host = host
   silent edit
   execute "normal! \<C-o>"
-  let b:metadata_filename = a:response.SourceName
+  let b:OmniSharp_metadata_filename = a:response.SourceName
   " setlocal nobuflisted bufhidden=wipe
   setlocal nomodifiable readonly
   if g:OmniSharp_lookup_metadata == 'preview' && !jumped_from_preview
@@ -891,7 +891,7 @@ endfunction
 
 function! OmniSharp#StartServerIfNotRunning(...) abort
   if OmniSharp#FugitiveCheck() | return | endif
-  if type(get(b:, "metadata_filename", v:null)) == type('') | return | endif
+  if type(get(b:, "OmniSharp_metadata_filename", v:null)) == type('') | return | endif
   let sln_or_dir = a:0 ? a:1 : ''
   call OmniSharp#StartServer(sln_or_dir, 1)
 endfunction
