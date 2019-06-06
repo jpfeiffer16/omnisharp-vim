@@ -293,7 +293,6 @@ function! s:CBGotoMetadata(response, metadata) abort
   silent edit
   execute "normal! \<C-o>"
   let b:OmniSharp_metadata_filename = a:response.SourceName
-  " setlocal nobuflisted bufhidden=wipe
   setlocal nomodifiable readonly
   if g:OmniSharp_lookup_metadata == 'preview' && !jumped_from_preview
     silent wincmd p
