@@ -240,7 +240,9 @@ endfunction
 
 function! s:CBGotoDefinition(opts, location, metadata) abort
   if type(a:location) != type({}) " Check whether a dict was returned
-    if type(g:OmniSharp_lookup_metadata) != type('')
+    echom type(a:metadata)
+    echom a:metadata
+    if type(g:OmniSharp_lookup_metadata) != type('') || type(a:metadata.MetadataSource) != type({})
       echo 'Not found'
       let found = 0
     else
@@ -275,21 +277,28 @@ function! s:CBGotoMetadata(response, metadata) abort
   \ temp_file,
   \ 'b'
   \)
+  let jumped_from_preview = &previewwindow
   if g:OmniSharp_lookup_metadata == 'preview'
-    execute 'silent pedit '.temp_file
-    silent wincmd p
-  elseif g:OmniSharp_lookup_metadata == 'window'
-    execute 'silent edit '.temp_file
-  else
+    execute 'silent pedit'
+    if !&previewwindow | silent wincmd p | endif
+  elseif g:OmniSharp_lookup_metadata != 'window'
     return 0
   endif
+  call OmniSharp#JumpToLocation({
+  \  'filename': temp_file,
+  \  'lnum': a:metadata.Line,
+  \  'col': a:metadata.Column
+  \}, 1)
   let b:OmniSharp_host = host
+  silent edit
+  execute "normal! \<C-o>"
   let b:metadata_filename = a:response.SourceName
-  call cursor(a:metadata.Line, a:metadata.Column)
   " setlocal nobuflisted bufhidden=wipe
   setlocal nomodifiable readonly
+  if g:OmniSharp_lookup_metadata == 'preview' && !jumped_from_preview
+    silent wincmd p
+  endif
   return 1
-
 endfunction
 
 function! OmniSharp#PreviewDefinition() abort
