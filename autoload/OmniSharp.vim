@@ -234,7 +234,7 @@ function! OmniSharp#GotoDefinition(...) abort
     " TODO: Get python working for metadata
     let loc = OmniSharp#py#eval('gotoDefinition()')
     if OmniSharp#CheckPyError() | return 0 | endif
-    return s:CBGotoDefinition(opts, loc)
+    return s:CBGotoDefinition(opts, loc, { 'MetadataSource': {}})
   endif
 endfunction
 
@@ -259,10 +259,8 @@ function! OmniSharp#GotoMetadata(metadata) abort
   if g:OmniSharp_server_stdio
     return OmniSharp#stdio#GotoMetadata(function('s:CBGotoMetadata'), a:metadata)
   else
-    " TODO: Implement python method
-    let response = OmniSharp#py#eval('getMetadata()')
-    if OmniSharp#CheckPyError() | return 0 | endif
-    return s:CBGotoMetadata(response)
+    echom 'GotoMetadata is not supported on OmniSharp server. Please look at upgrading to the stdio version'
+    return 0
   endif
 endfunction
 
