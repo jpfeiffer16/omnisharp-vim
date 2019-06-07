@@ -240,8 +240,6 @@ endfunction
 
 function! s:CBGotoDefinition(opts, location, metadata) abort
   if type(a:location) != type({}) " Check whether a dict was returned
-    echom type(a:metadata)
-    echom a:metadata
     if type(g:OmniSharp_lookup_metadata) != type('') || type(a:metadata.MetadataSource) != type({})
       echo 'Not found'
       let found = 0
