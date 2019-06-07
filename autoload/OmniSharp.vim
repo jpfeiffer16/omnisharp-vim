@@ -786,7 +786,11 @@ endfunction
 function! OmniSharp#CodeFormat(...) abort
   let opts = a:0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#CodeFormat(opts)
+    if type(get(b:, 'OmniSharp_metadata_filename')) != type('')
+      call OmniSharp#stdio#CodeFormat(opts)
+    else
+      echom 'CodeFormat is not supported in metadata files'
+    endif
   else
     call OmniSharp#py#eval('codeFormat()')
     call OmniSharp#CheckPyError()

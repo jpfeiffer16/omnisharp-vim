@@ -197,8 +197,11 @@ function! s:LocationsFromResponse(quickfixes) abort
 endfunction
 
 function! s:MakeChanges(body) abort
-  if len(get(a:body, 'Changes', []))
-    for change in get(a:body, 'Changes', [])
+  let changes = get(a:body, 'Changes', [])
+  if type(changes) == type(v:null) | let changes = [] | endif
+
+  if len(changes)
+    for change in changes
       let text = join(split(change.NewText, '\r\?\n', 1), "\n")
       let start = [change.StartLine, change.StartColumn]
       let end = [change.EndLine, change.EndColumn]
@@ -368,7 +371,8 @@ endfunction
 
 function! s:FindImplementationsRH(Callback, response) abort
   if !a:response.Success | return | endif
-  call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
+  let responses = a:response.Body.QuickFixes
+  call a:Callback(responses ? s:LocationsFromResponse(responses) : [])
 endfunction
 
 function! OmniSharp#stdio#FindMembers(Callback) abort
@@ -405,7 +409,8 @@ endfunction
 
 function! s:FindUsagesRH(Callback, response) abort
   if !a:response.Success | return | endif
-  call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
+  let usages = a:response.Body.QuickFixes
+  call a:Callback(usages ?  s:LocationsFromResponse(a:response.Body.QuickFixes) : [])
 endfunction
 
 function! OmniSharp#stdio#FixUsings(Callback) abort
@@ -425,7 +430,11 @@ function! s:FixUsingsRH(Callback, response) abort
   call s:MakeChanges(a:response.Body)
   call winrestview(winview)
   normal! ``
-  let locations = s:LocationsFromResponse(a:response.Body.AmbiguousResults)
+  if type(a:response.Body.AmbiguousResults) == type(v:null)
+    let locations = []
+  else
+    let locations = s:LocationsFromResponse(a:response.Body.AmbiguousResults)
+  endif
   call a:Callback(locations)
 endfunction
 
