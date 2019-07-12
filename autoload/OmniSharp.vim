@@ -537,6 +537,12 @@ function! s:CBGetCodeActions(mode, actions) abort
   endif
 endfunction
 
+function! OmniSharp#SwitchSolution() abort
+  " ctrlp#OmniSharp#switchsolution#setsolutions()
+  " " TODO: Need to pass args
+  " ctrlp#OmniSharp#switchsolution#init()
+endfunction
+
 " Accepts a Funcref callback argument, to be called after the response is
 " returned (synchronously or asynchronously) with the results
 function! OmniSharp#CodeCheck(...) abort
