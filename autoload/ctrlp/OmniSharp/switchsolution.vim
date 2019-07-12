@@ -43,8 +43,9 @@ call add(g:ctrlp_ext_vars, {
 
 
 function! ctrlp#OmniSharp#switchsolution#setsolutions(solutions) abort
+  let s:buffer = bufnr('%')
   let s:solutions = []
-  for solution in s:solutions
+  for solution in a:solutions
     call add(s:solutions, solution)
   endfor
 endfunction
@@ -67,21 +68,17 @@ endfunction
 "
 function! ctrlp#OmniSharp#switchsolution#accept(mode, str) abort
   call ctrlp#exit()
-  for quickfix in s:quickfixes
-    if quickfix.text == a:str
-      break
-    endif
-  endfor
-  echo quickfix.filename
-  call  OmniSharp#JumpToLocation(quickfix, 0)
+  call setbufvar(s:buffer, 'OmniSharp_buf_server', a:str)
+  call setbufvar(s:buffer, 'OmniSharp_host', v:null)
+  " TODO: Start server if it configured to autostart?
 endfunction
 
 " Give the extension an ID
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 
 " Allow it to be called later
-" function! ctrlp#OmniSharp#switchsolution#id() abort
-"   return s:id
-" endfunction
+function! ctrlp#OmniSharp#switchsolution#id() abort
+  return s:id
+endfunction
 
 " vim:et:sw=2:sts=2

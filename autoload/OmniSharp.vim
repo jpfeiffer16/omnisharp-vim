@@ -538,9 +538,10 @@ function! s:CBGetCodeActions(mode, actions) abort
 endfunction
 
 function! OmniSharp#SwitchSolution() abort
-  " ctrlp#OmniSharp#switchsolution#setsolutions()
-  " " TODO: Need to pass args
-  " ctrlp#OmniSharp#switchsolution#init()
+  let solution_files = s:FindSolutionsFiles(bufnr('%'))
+  echom solution_files
+  call ctrlp#OmniSharp#switchsolution#setsolutions(solution_files)
+  call ctrlp#init(ctrlp#OmniSharp#switchsolution#id())
 endfunction
 
 " Accepts a Funcref callback argument, to be called after the response is
