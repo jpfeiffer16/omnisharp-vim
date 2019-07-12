@@ -247,7 +247,15 @@ function! s:CBGotoDefinition(opts, location, metadata) abort
       let found = 0
     endif
   else
-    let found = OmniSharp#JumpToLocation(a:location, 0)
+    let omnisharp_host = OmniSharp#GetHost()
+    let found = OmniSharp#JumpToLocation(a:location, 1)
+    let b:OmniSharp_host = omnisharp_host
+    let b:OmniSharp_buf_server = b:OmniSharp_host.sln_or_dir
+    let winview = winsaveview()
+    edit %
+    echom winview
+    call winrestview(winview)
+    execute "normal! \<C-o>"
   endif
   if has_key(a:opts, 'Callback') && !went_to_metadata
     call a:opts.Callback(found)
