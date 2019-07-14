@@ -62,8 +62,35 @@ function! s:findsymbols.gather_candidates(args, context) abort
 endfunction
 
 
+let s:switchsolution = {
+\   'name': 'OmniSharp/switchsolution',
+\   'description': 'Switch Solution',
+\   'default_action': 'select'
+\ }
+function! s:switchsolution.gather_candidates(args, context) abort
+  let solutions = get(a:args, 0, [])
+  echom "Gathering candidates"
+  return map(solutions, '{
+  \   "word": v:val,
+  \   "source__OmniSharp_solution": v:val
+  \ }')
+endfunction
+
+
+let s:switchsolution_action_table = {
+\   'select': {
+\     'description': 'select solution',
+\   }
+\ }
+
+function! s:switchsolution_action_table.select.func(candidate) abort
+  call OmniSharp#SetSolution(bufnr('%'), a:candidate.source__OmniSharp_solution)
+endfunction
+
+let s:switchsolution.action_table = s:switchsolution_action_table
+
 function! unite#sources#OmniSharp#define() abort
-  return [s:findcodeactions, s:findsymbols]
+  return [s:findcodeactions, s:findsymbols, s:switchsolution]
 endfunction
 
 let &cpoptions = s:save_cpo
