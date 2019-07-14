@@ -547,9 +547,25 @@ endfunction
 
 function! OmniSharp#SwitchSolution() abort
   let solution_files = s:FindSolutionsFiles(bufnr('%'))
-  echom solution_files
-  call ctrlp#OmniSharp#switchsolution#setsolutions(solution_files)
-  call ctrlp#init(ctrlp#OmniSharp#switchsolution#id())
+
+  " if g:OmniSharp_selector_ui ==? 'unite'
+  call unite#start([['OmniSharp/switchsolution', solution_files]])
+  " elseif g:OmniSharp_selector_ui ==? 'ctrlp'
+    " call ctrlp#OmniSharp#switchsolution#setsolutions(solution_files)
+    " call ctrlp#init(ctrlp#OmniSharp#switchsolution#id())
+  " elseif g:OmniSharp_selector_ui ==? 'fzf'
+  " call fzf#OmniSharp#SwitchSolution(solution_files)
+  " else
+  "   let title = 'symbols' . (len(a:filter) ? ': ' . a:filter : '')
+  "   call s:setquickfix(a:locations, title)
+  " endif
+
+endfunction
+
+function! OmniSharp#SetSolution(buffer, solution) abort
+  call setbufvar(a:buffer, 'OmniSharp_buf_server', a:solution)
+  call setbufvar(a:buffer, 'OmniSharp_host', v:null)
+  " TODO: Start server if it configured to autostart?
 endfunction
 
 " Accepts a Funcref callback argument, to be called after the response is
@@ -1066,7 +1082,7 @@ function! OmniSharp#AppendCtrlPExtensions() abort
   endif
   if !exists('g:OmniSharp_ctrlp_extensions_added')
     let g:OmniSharp_ctrlp_extensions_added = 1
-    let g:ctrlp_extensions += ['findsymbols', 'findcodeactions']
+    let g:ctrlp_extensions += ['findsymbols', 'findcodeactions', 'switchsolution']
   endif
 endfunction
 

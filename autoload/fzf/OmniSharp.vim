@@ -52,6 +52,18 @@ function! fzf#OmniSharp#GetCodeActions(mode, actions) abort
   \ 'sink': function('s:action_sink')})
 endfunction
 
+function! s:switchsolution_sink(str) abort
+  call OmniSharp#SetSolution(bufnr('%'), a:str)
+endfunction
+
+function! fzf#OmniSharp#SwitchSolution(solutions) abort
+  call fzf#run({
+  \ 'source': a:solutions,
+  \ 'down': '40%',
+  \ 'sink': function('s:switchsolution_sink')
+  \})
+endfunction
+
 let &cpoptions = s:save_cpo
 unlet s:save_cpo
 

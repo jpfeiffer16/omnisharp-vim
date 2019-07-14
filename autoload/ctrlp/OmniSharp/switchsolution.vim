@@ -68,9 +68,7 @@ endfunction
 "
 function! ctrlp#OmniSharp#switchsolution#accept(mode, str) abort
   call ctrlp#exit()
-  call setbufvar(s:buffer, 'OmniSharp_buf_server', a:str)
-  call setbufvar(s:buffer, 'OmniSharp_host', v:null)
-  " TODO: Start server if it configured to autostart?
+  call OmniSharp#SetSolution(s:buffer, str)
 endfunction
 
 " Give the extension an ID
