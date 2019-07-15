@@ -68,7 +68,7 @@ endfunction
 "
 function! ctrlp#OmniSharp#switchsolution#accept(mode, str) abort
   call ctrlp#exit()
-  call OmniSharp#SetSolution(s:buffer, str)
+  call OmniSharp#SetSolution(s:buffer, a:str)
 endfunction
 
 " Give the extension an ID
