@@ -548,17 +548,17 @@ endfunction
 function! OmniSharp#SwitchSolution() abort
   let solution_files = s:FindSolutionsFiles(bufnr('%'))
 
-  " if g:OmniSharp_selector_ui ==? 'unite'
-  call unite#start([['OmniSharp/switchsolution', solution_files]])
-  " elseif g:OmniSharp_selector_ui ==? 'ctrlp'
-    " call ctrlp#OmniSharp#switchsolution#setsolutions(solution_files)
-    " call ctrlp#init(ctrlp#OmniSharp#switchsolution#id())
-  " elseif g:OmniSharp_selector_ui ==? 'fzf'
-  " call fzf#OmniSharp#SwitchSolution(solution_files)
-  " else
-  "   let title = 'symbols' . (len(a:filter) ? ': ' . a:filter : '')
-  "   call s:setquickfix(a:locations, title)
-  " endif
+  if g:OmniSharp_selector_ui ==? 'unite'
+    call unite#start([['OmniSharp/switchsolution', solution_files]])
+  elseif g:OmniSharp_selector_ui ==? 'ctrlp'
+    call ctrlp#OmniSharp#switchsolution#setsolutions(solution_files)
+    call ctrlp#init(ctrlp#OmniSharp#switchsolution#id())
+  elseif g:OmniSharp_selector_ui ==? 'fzf'
+    call fzf#OmniSharp#SwitchSolution(solution_files)
+  else
+    let title = 'symbols' . (len(a:filter) ? ': ' . a:filter : '')
+    call s:setquickfix(a:locations, title)
+  endif
 
 endfunction
 
