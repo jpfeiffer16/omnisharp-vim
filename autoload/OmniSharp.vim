@@ -1062,6 +1062,7 @@ function! OmniSharp#RestartServer() abort
     return
   endif
   call OmniSharp#StopServer(1, sln_or_dir)
+  call setbufvar(bufnr('%'), 'OmniSharp_host', v:null)
   sleep 500m
   call s:StartServer(sln_or_dir)
 endfunction
