@@ -252,7 +252,6 @@ function! s:CBGotoDefinition(opts, location, metadata) abort
     if empty(getbufvar(bufnr('%'), 'OmniSharp_buf_server'))
       let b:OmniSharp_host = omnisharp_host
       let b:OmniSharp_buf_server = b:OmniSharp_host.sln_or_dir
-      echom bufnr(b:OmniSharp_buf_server)
       let winview = winsaveview()
       edit %
       call winrestview(winview)
@@ -557,9 +556,10 @@ function! OmniSharp#SwitchSolution() abort
     call ctrlp#init(ctrlp#OmniSharp#switchsolution#id())
   elseif g:OmniSharp_selector_ui ==? 'fzf'
     call fzf#OmniSharp#SwitchSolution(solution_files)
-  else
-    let title = 'symbols' . (len(a:filter) ? ': ' . a:filter : '')
-    call s:setquickfix(a:locations, title)
+  " else
+  "   TODO
+  "   let title = 'symbols' . (len(a:filter) ? ': ' . a:filter : '')
+  "   call s:setquickfix(a:locations, title)
   endif
 
 endfunction

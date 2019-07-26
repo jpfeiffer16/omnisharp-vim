@@ -36,7 +36,7 @@ call add(g:ctrlp_ext_vars, {
 \ 'accept': 'ctrlp#OmniSharp#switchsolution#accept',
 \ 'lname': 'Switch Solution',
 \ 'sname': 'switch solution',
-\ 'type': 'tabs',
+\ 'type': 'line',
 \ 'sort': 1,
 \ 'nolim': 1,
 \ })
