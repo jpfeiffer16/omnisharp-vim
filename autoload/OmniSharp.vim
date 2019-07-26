@@ -567,6 +567,7 @@ endfunction
 function! OmniSharp#SetSolution(buffer, solution) abort
   call setbufvar(a:buffer, 'OmniSharp_buf_server', a:solution)
   call setbufvar(a:buffer, 'OmniSharp_host', v:null)
+  call OmniSharp#StartServer(a:solution)
   " TODO: Start server if it configured to autostart?
 endfunction
 
@@ -947,16 +948,16 @@ function! OmniSharp#FindSolutionOrDir(...) abort
   let bufnum = a:0 > 1 ? a:2 : bufnr('%')
   if empty(getbufvar(bufnum, 'OmniSharp_buf_server'))
     let dir = s:FindServerRunningOnParentDirectory(bufnum)
-    if !empty(dir)
-      call setbufvar(bufnum, 'OmniSharp_buf_server', dir)
-    else
-      try
-        let sln = s:FindSolution(interactive, bufnum)
-        call setbufvar(bufnum, 'OmniSharp_buf_server', sln)
-      catch e
-        return ''
-      endtry
-    endif
+    " if !empty(dir)
+    "   call setbufvar(bufnum, 'OmniSharp_buf_server', dir)
+    " else
+    "   try
+    "     let sln = s:FindSolution(interactive, bufnum)
+    "     call setbufvar(bufnum, 'OmniSharp_buf_server', sln)
+    "   catch e
+    "     return ''
+    "   endtry
+    " endif
   endif
 
   return getbufvar(bufnum, 'OmniSharp_buf_server')
@@ -977,6 +978,7 @@ endfunction
 function! OmniSharp#StartServer(...) abort
   let sln_or_dir = a:0 && a:1 !=# '' ? fnamemodify(a:1, ':p') : ''
   let check_is_running = a:0 > 1 && a:2
+  let solution_picker_ui_opened = v:false
 
   if sln_or_dir !=# ''
     if filereadable(sln_or_dir)
@@ -990,16 +992,20 @@ function! OmniSharp#StartServer(...) abort
       return
     endif
   else
-    let sln_or_dir = OmniSharp#FindSolutionOrDir()
-    if empty(sln_or_dir)
-      if expand('%:e') ==? 'csx' || expand('%:e') ==? 'cake'
-        " .csx and .cake files do not require solutions or projects
-        let sln_or_dir = expand('%:p:h')
-      else
-        call OmniSharp#util#EchoErr('Could not find solution file or directory to start server')
-        return
-      endif
-    endif
+    " Choose the solution to start once it is chosen, this function
+    " will be called again to actually start it.
+    let solution_picker_ui_opened = v:true
+    call OmniSharp#SwitchSolution()
+    " let sln_or_dir = OmniSharp#FindSolutionOrDir()
+    " if empty(sln_or_dir)
+    "   if expand('%:e') ==? 'csx' || expand('%:e') ==? 'cake'
+    "     " .csx and .cake files do not require solutions or projects
+    "     let sln_or_dir = expand('%:p:h')
+    "   else
+    "     call OmniSharp#util#EchoErr('Could not find solution file or directory to start server')
+    "     return
+    "   endif
+    " endif
   endif
 
   " Optionally perform check if server is already running
@@ -1014,7 +1020,9 @@ function! OmniSharp#StartServer(...) abort
     if running | return | endif
   endif
 
-  call s:StartServer(sln_or_dir)
+  if !solution_picker_ui_opened
+    call s:StartServer(sln_or_dir)
+  endif
 endfunction
 
 function! s:StartServer(sln_or_dir) abort
@@ -1184,19 +1192,21 @@ function! s:FindSolution(interactive, bufnum) abort
       throw 'Ambiguous solution file'
     endif
 
-    let labels = ['Solution:']
-    let index = 1
-    for solutionfile in solution_files
-      call add(labels, index . '. ' . solutionfile)
-      let index += 1
-    endfor
+    return ''
 
-    let choice = inputlist(labels)
-
-    if choice <= 0 || choice > len(solution_files)
-      throw 'No solution selected'
-    endif
-    return solution_files[choice - 1]
+    " let labels = ['Solution:']
+    " let index = 1
+    " for solutionfile in solution_files
+    "   call add(labels, index . '. ' . solutionfile)
+    "   let index += 1
+    " endfor
+    "
+    " let choice = inputlist(labels)
+    "
+    " if choice <= 0 || choice > len(solution_files)
+    "   throw 'No solution selected'
+    " endif
+    " return solution_files[choice - 1]
   endif
 endfunction
 

@@ -18,10 +18,6 @@ setlocal omnifunc=OmniSharp#Complete
 
 call OmniSharp#AppendCtrlPExtensions()
 
-if get(g:, 'OmniSharp_start_server', 0) == 1
-  call OmniSharp#StartServerIfNotRunning()
-endif
-
 command! -buffer -bar OmniSharpCodeFormat                          call OmniSharp#CodeFormat()
 command! -buffer -bar OmniSharpDocumentation                       call OmniSharp#TypeLookupWithDocumentation()
 command! -buffer -bar OmniSharpFindImplementations                 call OmniSharp#FindImplementations()
@@ -122,5 +118,9 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpTypeLookup
 \
 \|  setlocal omnifunc< errorformat< makeprg<'
+
+if get(g:, 'OmniSharp_start_server', 0) == 1
+  call OmniSharp#StartServerIfNotRunning()
+endif
 
 " vim:et:sw=2:sts=2
