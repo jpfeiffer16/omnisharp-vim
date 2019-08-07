@@ -119,8 +119,12 @@ let b:undo_ftplugin .= '
 \
 \|  setlocal omnifunc< errorformat< makeprg<'
 
-if get(g:, 'OmniSharp_start_server', 0) == 1
-  call OmniSharp#StartServerIfNotRunning()
-endif
+function! s:StartServer(...) abort
+  if get(g:, 'OmniSharp_start_server', 0) == 1
+    call OmniSharp#StartServerIfNotRunning()
+  endif
+endfunction
+
+call timer_start(0, funcref('s:StartServer'))
 
 " vim:et:sw=2:sts=2
