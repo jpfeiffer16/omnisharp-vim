@@ -247,11 +247,11 @@ function! s:CBGotoDefinition(opts, location, metadata) abort
       let found = 0
     endif
   else
-    let omnisharp_host = OmniSharp#GetHost()
+    " let omnisharp_host = OmniSharp#GetHost()
     let found = OmniSharp#JumpToLocation(a:location, 1)
     if empty(getbufvar(bufnr('%'), 'OmniSharp_buf_server'))
-      let b:OmniSharp_host = omnisharp_host
-      let b:OmniSharp_buf_server = b:OmniSharp_host.sln_or_dir
+      " let b:OmniSharp_host = omnisharp_host
+      " let b:OmniSharp_buf_server = b:OmniSharp_host.sln_or_dir
       let winview = winsaveview()
       edit %
       call winrestview(winview)
@@ -383,6 +383,10 @@ endfunction
 
 function! OmniSharp#JumpToLocation(location, noautocmds) abort
   if a:location.filename !=# ''
+    let omnisharp_host = v:null
+    if &filetype == 'cs'
+       let omnisharp_host = OmniSharp#GetHost()
+    endif
     " Update the ' mark, adding this location to the jumplist.
     normal! m'
     if fnamemodify(a:location.filename, ':p') !=# expand('%:p')
@@ -390,6 +394,10 @@ function! OmniSharp#JumpToLocation(location, noautocmds) abort
       \ (a:noautocmds ? 'noautocmd' : '')
       \ (&modified && !&hidden ? 'split' : 'edit')
       \ fnameescape(a:location.filename)
+      if &filetype == 'cs'
+        let b:OmniSharp_host = omnisharp_host
+        let b:OmniSharp_buf_server = b:OmniSharp_host.sln_or_dir
+      endif
     endif
     if has_key(a:location, 'lnum') && a:location.lnum > 0
       call cursor(a:location.lnum, a:location.col)
