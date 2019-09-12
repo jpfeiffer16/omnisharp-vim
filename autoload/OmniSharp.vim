@@ -67,6 +67,7 @@ function! OmniSharp#GetHost(...) abort
 endfunction
 
 function! OmniSharp#GetCompletions(partial, ...) abort
+  echom "Getting completions"
   let opts = a:0 ? { 'Callback': a:1 } : {}
   if !OmniSharp#IsServerRunning()
     return []

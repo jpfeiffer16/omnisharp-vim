@@ -147,6 +147,7 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
     let command += [ '-p', OmniSharp#GetPort(a:solution_file) ]
   endif
   let command += [ '-s', solution_path ]
+  let command += [ '--plugin', '/home/jpfeiffer/Source/Razor.VSCode/src/Microsoft.AspNetCore.Razor.OmniSharpPlugin/bin/Debug/net461/Microsoft.AspNetCore.Razor.OmniSharpPlugin.dll' ]
 
   if !has('win32') && !s:is_cygwin() && g:OmniSharp_server_use_mono
     let command = insert(command, 'mono')
